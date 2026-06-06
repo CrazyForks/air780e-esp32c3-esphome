@@ -80,16 +80,23 @@ end
 if containsValue(config.NOTIFY_TYPE, "serial") then
     -- 串口配置
     uart.setup(1, 115200, 8, 1, uart.NONE)
+    -- 串口接收缓冲
+    local uart_rx_buf = ""
     -- 串口接收回调
     uart.on(1, "receive", function(id, len)
         local data = uart.read(id, len)
         log.info("uart read:", id, len, data)
-        if config.ROLE == "MASTER" then
-            -- 主机, 通过队列发送数据
-            util_notify.add(data)
-        else
-            -- 从机, 通过串口发送数据
-            uart.write(1, data)
+        -- 从机: 解析串口指令 "SMS,号码,内容\n" 并发送短信
+        uart_rx_buf = uart_rx_buf .. data
+        local line = uart_rx_buf:match("^(.-)\n")
+        while line do
+            uart_rx_buf = uart_rx_buf:sub(#line + 2)
+            local receiver, content = line:match("^SMS,(+?%d+),(.+)$")
+            if receiver and content and #receiver >= 5 and #receiver <= 20 then
+                sms.send(receiver, content)
+                log.info("uart sms send", receiver, content)
+            end
+            line = uart_rx_buf:match("^(.-)\n")
         end
     end)
 end
