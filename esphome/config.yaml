@@ -162,7 +162,7 @@ text:
     id: sms_content
     optimistic: true
     min_length: 0
-    max_length: 300
+    max_length: 255
     mode: text
 
 button:
