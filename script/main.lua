@@ -180,13 +180,6 @@ sys.taskInit(function()
     sys.subscribe("POWERKEY_SHORT_PRESS", function() util_notify.add("#ALIVE") end)
     -- 电源键长按查询流量
     sys.subscribe("POWERKEY_LONG_PRESS", util_mobile.queryTraffic)
-
-    sys.wait(60000);
-    -- EC618配置小区重选信号差值门限，不能大于15dbm，必须在飞行模式下才能用
-    mobile.flymode(0, true)
-    mobile.config(mobile.CONF_RESELTOWEAKNCELL, 10)
-    mobile.config(mobile.CONF_STATICCONFIG, 1) -- 开启网络静态优化
-    mobile.flymode(0, false)
 end)
 
 sys.taskInit(function()
